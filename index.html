@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🦞 AI 团队看板</title>
+<meta name="description" content="OpenClaw AI 多 Agent 协作团队实时看板">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #0f0f1a;
+  --bg-secondary: #1a1a2e;
+  --bg-card: rgba(30, 30, 50, 0.8);
+  --bg-glass: rgba(255, 255, 255, 0.05);
+  --border: rgba(255, 255, 255, 0.08);
+  --text-primary: #e8e8f0;
+  --text-secondary: #8888a0;
+  --text-muted: #555570;
+  --accent-blue: #4a9eff;
+  --accent-green: #34d399;
+  --accent-yellow: #fbbf24;
+  --accent-red: #f87171;
+  --accent-purple: #a78bfa;
+  --accent-pink: #f472b6;
+  --accent-orange: #fb923c;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', 'Noto Sans SC', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(ellipse at 20% 50%, rgba(74, 158, 255, 0.08) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 20%, rgba(167, 139, 250, 0.06) 0%, transparent 50%),
+              radial-gradient(ellipse at 50% 80%, rgba(52, 211, 153, 0.04) 0%, transparent 50%);
+  z-index: 0;
+  animation: drift 20s ease-in-out infinite;
+}
+
+@keyframes drift {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-2%, 1%); }
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px 60px;
+}
+
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+}
+
+.header .subtitle {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.header .live-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent-green);
+  border-radius: 50%;
+  display: inline-block;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.4); }
+  50% { opacity: 0.8; box-shadow: 0 0 0 6px rgba(52, 211, 153, 0); }
+}
+
+/* Section */
+.section {
+  margin-bottom: 36px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-header h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.section-header .badge {
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 2px 10px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+/* Agent Grid */
+.agent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.agent-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.agent-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.agent-card .emoji {
+  font-size: 2rem;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.agent-card .name {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.agent-card .role {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.agent-card .model-tag {
+  display: inline-block;
+  font-size: 0.65rem;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(74, 158, 255, 0.15);
+  color: var(--accent-blue);
+  border: 1px solid rgba(74, 158, 255, 0.2);
+}
+
+.agent-card .model-tag.gemini {
+  background: rgba(52, 211, 153, 0.15);
+  color: var(--accent-green);
+  border-color: rgba(52, 211, 153, 0.2);
+}
+
+.agent-card .model-tag.kimi {
+  background: rgba(251, 191, 36, 0.15);
+  color: var(--accent-yellow);
+  border-color: rgba(251, 191, 36, 0.2);
+}
+
+.status-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-green);
+  margin-right: 4px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.status-dot.new {
+  background: var(--accent-yellow);
+  animation: none;
+}
+
+/* Task list */
+.task-list { list-style: none; }
+
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  transition: all 0.2s;
+  backdrop-filter: blur(10px);
+}
+
+.task-item:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.task-status {
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.task-status.running { background: rgba(74, 158, 255, 0.15); color: var(--accent-blue); }
+.task-status.done { background: rgba(52, 211, 153, 0.15); color: var(--accent-green); }
+.task-status.pending { background: rgba(251, 191, 36, 0.15); color: var(--accent-yellow); }
+.task-status.high { background: rgba(248, 113, 113, 0.15); color: var(--accent-red); }
+
+.task-name { flex: 1; font-size: 0.85rem; }
+
+.task-agents {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* Cron Timeline */
+.cron-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 8px;
+}
+
+.cron-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  backdrop-filter: blur(10px);
+}
+
+.cron-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  color: var(--accent-purple);
+  min-width: 45px;
+}
+
+.cron-name { flex: 1; color: var(--text-primary); }
+.cron-agent { color: var(--text-secondary); }
+
+/* Completed */
+.completed-list { list-style: none; }
+
+.completed-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.8rem;
+}
+
+.completed-date {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  min-width: 50px;
+}
+
+/* Stats bar */
+.stats-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 40px;
+  padding: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: var(--bg-glass);
+  border-radius: 8px;
+  font-size: 0.8rem;
+}
+
+.stat .value {
+  font-weight: 600;
+  color: var(--accent-blue);
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  margin-top: 40px;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .container { padding: 20px 12px 40px; }
+  .header h1 { font-size: 1.8rem; }
+  .agent-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+  .agent-card { padding: 12px; }
+  .cron-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>🦞 AI 团队看板</h1>
+    <div class="subtitle">
+      <span class="live-dot"></span>
+      <span id="update-time">更新时间：加载中...</span>
+    </div>
+  </div>
+
+  <!-- Team -->
+  <div class="section">
+    <div class="section-header">
+      <h2>👥 团队状态</h2>
+      <span class="badge">7 Agents</span>
+    </div>
+    <div class="agent-grid">
+      <div class="agent-card">
+        <span class="emoji">🧠</span>
+        <div class="name">统筹</div>
+        <div class="role">任务拆解 · 资源调配</div>
+        <span class="model-tag">GPT-5.4</span>
+        <div style="margin-top:8px"><span class="status-dot"></span><span style="font-size:0.7rem;color:var(--text-secondary)">在线</span></div>
+      </div>
+      <div class="agent-card">
+        <span class="emoji">⚡</span>
+        <div class="name">执行</div>
+        <div class="role">代码实现 · 自动化</div>
+        <span class="model-tag">GPT-5.4</span>
+        <div style="margin-top:8px"><span class="status-dot"></span><span style="font-size:0.7rem;color:var(--text-secondary)">在线</span></div>
+      </div>
+      <div class="agent-card">
+        <span class="emoji">🔍</span>
+        <div class="name">调研</div>
+        <div class="role">深度调研 · 报告输出</div>
+        <span class="model-tag">GPT-5.4</span>
+        <div style="margin-top:8px"><span class="status-dot"></span><span style="font-size:0.7rem;color:var(--text-secondary)">在线</span></div>
+      </div>
+      <div class="agent-card">
+        <span class="emoji">🎨</span>
+        <div class="name">创意</div>
+        <div class="role">视觉设计 · 创意素材</div>
+        <span class="model-tag gemini">Gemini 3.1</span>
+        <div style="margin-top:8px"><span class="status-dot"></span><span style="font-size:0.7rem;color:var(--text-secondary)">在线</span></div>
+      </div>
+      <div class="agent-card">
+        <span class="emoji">📚</span>
+        <div class="name">知识</div>
+        <div class="role">知识整理 · 学习沉淀</div>
+        <span class="model-tag">GPT-5.4</span>
+        <div style="margin-top:8px"><span class="status-dot"></span><span style="font-size:0.7rem;color:var(--text-secondary)">在线</span></div>
+      </div>
+      <div class="agent-card">
+        <span class="emoji">🔮</span>
+        <div class="name">复盘</div>
+        <div class="role">日报总结 · 夜间巡检</div>
+        <span class="model-tag">GPT-5.4</span>
+        <div style="margin-top:8px"><span class="status-dot"></span><span style="font-size:0.7rem;color:var(--text-secondary)">在线</span></div>
+      </div>
+      <div class="agent-card">
+        <span class="emoji">💰</span>
+        <div class="name">理财</div>
+        <div class="role">财经监控 · 投资分析</div>
+        <span class="model-tag kimi">Kimi K2.5</span>
+        <div style="margin-top:8px"><span class="status-dot new"></span><span style="font-size:0.7rem;color:var(--accent-yellow)">新上线</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- In Progress -->
+  <div class="section">
+    <div class="section-header">
+      <h2>🏃 进行中</h2>
+      <span class="badge">5 项</span>
+    </div>
+    <ul class="task-list">
+      <li class="task-item">
+        <span class="task-status running">🔄 执行中</span>
+        <span class="task-name">日报与分派闭环机制（07:00/21:00 + 回执追踪）</span>
+        <span class="task-agents">🧠</span>
+      </li>
+      <li class="task-item">
+        <span class="task-status running">🔄 执行中</span>
+        <span class="task-name">社媒全流程（XHS + X 发推）</span>
+        <span class="task-agents">🧠⚡🔍</span>
+      </li>
+      <li class="task-item">
+        <span class="task-status running">🔄 执行中</span>
+        <span class="task-name">CarClaw Demo 达到可发版标准</span>
+        <span class="task-agents">🧠⚡🎨</span>
+      </li>
+      <li class="task-item">
+        <span class="task-status running">🔄 执行中</span>
+        <span class="task-name">每日安全巡检自动回传</span>
+        <span class="task-agents">🧠⚡</span>
+      </li>
+      <li class="task-item">
+        <span class="task-status running">🔄 Phase4</span>
+        <span class="task-name">OpenClaw 全面升级（命名/Cron/安全/文档）</span>
+        <span class="task-agents">🧠</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Backlog -->
+  <div class="section">
+    <div class="section-header">
+      <h2>📋 待接单</h2>
+      <span class="badge">4 项</span>
+    </div>
+    <ul class="task-list">
+      <li class="task-item">
+        <span class="task-status high">🔴 高</span>
+        <span class="task-name">朋友圈总结展示（架构/流程/叙事）</span>
+        <span class="task-agents">🧠🎨🔍🔮</span>
+      </li>
+      <li class="task-item">
+        <span class="task-status high">🔴 高</span>
+        <span class="task-name">新闻频道内部文案泄露排查</span>
+        <span class="task-agents">⚡</span>
+      </li>
+      <li class="task-item">
+        <span class="task-status pending">🟡 中</span>
+        <span class="task-name">团队日报展示优化 v2</span>
+        <span class="task-agents">🧠🎨📚</span>
+      </li>
+      <li class="task-item">
+        <span class="task-status pending">🟡 中</span>
+        <span class="task-name">GitHub 涨星计划</span>
+        <span class="task-agents">🧠🔍🎨</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Cron -->
+  <div class="section">
+    <div class="section-header">
+      <h2>⏰ 定时任务</h2>
+      <span class="badge">15 active</span>
+    </div>
+    <div class="cron-grid">
+      <div class="cron-item"><span class="cron-time">07:00</span><span class="cron-name">📰 早间待办日报</span><span class="cron-agent">🔮</span></div>
+      <div class="cron-item"><span class="cron-time">07:50</span><span class="cron-name">💰 财经早盘</span><span class="cron-agent">💰</span></div>
+      <div class="cron-item"><span class="cron-time">08:00</span><span class="cron-name">📋 看板播报 + 📡 AI新闻①</span><span class="cron-agent">🧠🔍</span></div>
+      <div class="cron-item"><span class="cron-time">08:05</span><span class="cron-name">📨 自动分派</span><span class="cron-agent">🧠</span></div>
+      <div class="cron-item"><span class="cron-time">10:00</span><span class="cron-name">✏️ 自媒体草案</span><span class="cron-agent">⚡</span></div>
+      <div class="cron-item"><span class="cron-time">11:35</span><span class="cron-name">💰 财经午盘</span><span class="cron-agent">💰</span></div>
+      <div class="cron-item"><span class="cron-time">12:00</span><span class="cron-name">📋 看板播报</span><span class="cron-agent">🧠</span></div>
+      <div class="cron-item"><span class="cron-time">12:30</span><span class="cron-name">📡 AI新闻②</span><span class="cron-agent">🔍</span></div>
+      <div class="cron-item"><span class="cron-time">15:30</span><span class="cron-name">💰 财经尾盘</span><span class="cron-agent">💰</span></div>
+      <div class="cron-item"><span class="cron-time">17:00</span><span class="cron-name">🐙 GitHub Top10</span><span class="cron-agent">🔍</span></div>
+      <div class="cron-item"><span class="cron-time">18:00</span><span class="cron-name">📡 AI新闻③</span><span class="cron-agent">🔍</span></div>
+      <div class="cron-item"><span class="cron-time">21:00</span><span class="cron-name">📋 看板播报 + 晚间日报</span><span class="cron-agent">🧠🔮</span></div>
+      <div class="cron-item"><span class="cron-time">22:00</span><span class="cron-name">📡 AI新闻④</span><span class="cron-agent">🔍</span></div>
+      <div class="cron-item"><span class="cron-time">22:30</span><span class="cron-name">💰 财经收盘</span><span class="cron-agent">💰</span></div>
+      <div class="cron-item"><span class="cron-time">01:00</span><span class="cron-name">🔒 夜间安全巡检</span><span class="cron-agent">🔮</span></div>
+    </div>
+  </div>
+
+  <!-- Completed -->
+  <div class="section">
+    <div class="section-header">
+      <h2>✅ 近期完成</h2>
+    </div>
+    <ul class="completed-list">
+      <li class="completed-item"><span class="completed-date">03-10</span>✅ 4 账号 Fallback 分流配置完成</li>
+      <li class="completed-item"><span class="completed-date">03-10</span>✅ Gemini 升级 3.1 Pro Preview</li>
+      <li class="completed-item"><span class="completed-date">03-10</span>✅ Plan C 命名升级（统筹/执行/创意/知识/复盘/理财）</li>
+      <li class="completed-item"><span class="completed-date">03-10</span>✅ openclaw-config 项目创建 + deploy.sh</li>
+      <li class="completed-item"><span class="completed-date">03-10</span>✅ security-audit.sh 安全审计脚本</li>
+      <li class="completed-item"><span class="completed-date">03-09</span>✅ 圆桌论坛（4 模型讨论室）创建</li>
+      <li class="completed-item"><span class="completed-date">03-09</span>✅ AI 新闻管线上线（4x/天）</li>
+      <li class="completed-item"><span class="completed-date">03-09</span>✅ 协作大厅自动分派上线</li>
+      <li class="completed-item"><span class="completed-date">03-08</span>✅ memory-lancedb-pro 集成</li>
+      <li class="completed-item"><span class="completed-date">03-07</span>✅ 知识库 9 分类种子文件创建</li>
+    </ul>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat"><span>🤖</span><span class="value">7</span> Agents</div>
+    <div class="stat"><span>🔑</span><span class="value">4</span> OpenAI 账号</div>
+    <div class="stat"><span>🧠</span><span class="value">GPT-5.4</span></div>
+    <div class="stat"><span>💎</span><span class="value">Gemini 3.1</span> Pro</div>
+    <div class="stat"><span>⏰</span><span class="value">15</span> Cron Jobs</div>
+    <div class="stat"><span>🧬</span><span class="value">LanceDB</span> Memory</div>
+    <div class="stat"><span>📡</span><span class="value">12</span> Discord 频道</div>
+  </div>
+
+  <div class="footer">
+    🦞 OpenClaw 2026.3.7 · Powered by GPT-5.4 × Gemini 3.1 × Kimi K2.5
+  </div>
+
+</div>
+
+<script>
+  document.getElementById('update-time').textContent = 
+    '更新时间：' + new Date().toLocaleString('zh-CN', {
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
+</script>
+</body>
+</html>
