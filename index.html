@@ -8,34 +8,23 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg-primary: #0f0f1a;
-  --bg-secondary: #1a1a2e;
-  --bg-card: rgba(30, 30, 50, 0.8);
-  --bg-glass: rgba(255, 255, 255, 0.05);
-  --border: rgba(255, 255, 255, 0.08);
-  --text-primary: #e8e8f0;
-  --text-secondary: #8888a0;
-  --text-muted: #555570;
-  --accent-blue: #4a9eff;
-  --accent-green: #34d399;
-  --accent-yellow: #fbbf24;
-  --accent-red: #f87171;
-  --accent-purple: #a78bfa;
+  --bg-primary: #0f0f1a; --bg-secondary: #1a1a2e;
+  --bg-card: rgba(30, 30, 50, 0.8); --bg-glass: rgba(255, 255, 255, 0.05);
+  --border: rgba(255, 255, 255, 0.08); --text-primary: #e8e8f0;
+  --text-secondary: #8888a0; --text-muted: #555570;
+  --accent-blue: #4a9eff; --accent-green: #34d399;
+  --accent-yellow: #fbbf24; --accent-red: #f87171;
+  --accent-purple: #a78bfa; --accent-pink: #f472b6; --accent-orange: #fb923c;
 }
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  font-family: 'Inter', 'Noto Sans SC', sans-serif;
-  background: var(--bg-primary); color: var(--text-primary);
-  min-height: 100vh; overflow-x: hidden;
-}
-body::before {
-  content: ''; position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
-  background: radial-gradient(ellipse at 20% 50%, rgba(74,158,255,0.08) 0%, transparent 50%),
-              radial-gradient(ellipse at 80% 20%, rgba(167,139,250,0.06) 0%, transparent 50%);
-  z-index: 0; animation: drift 20s ease-in-out infinite;
-}
-@keyframes drift { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-2%,1%); } }
-@keyframes pulse { 0%,100% { opacity:1; box-shadow:0 0 0 0 rgba(52,211,153,0.4); } 50% { opacity:0.8; box-shadow:0 0 0 6px rgba(52,211,153,0); } }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter','Noto Sans SC',sans-serif; background:var(--bg-primary); color:var(--text-primary); min-height:100vh; overflow-x:hidden; }
+body::before { content:''; position:fixed; top:-50%; left:-50%; width:200%; height:200%;
+  background:radial-gradient(ellipse at 20% 50%,rgba(74,158,255,0.08) 0%,transparent 50%),
+  radial-gradient(ellipse at 80% 20%,rgba(167,139,250,0.06) 0%,transparent 50%),
+  radial-gradient(ellipse at 50% 80%,rgba(52,211,153,0.04) 0%,transparent 50%);
+  z-index:0; animation:drift 20s ease-in-out infinite; }
+@keyframes drift { 0%,100%{ transform:translate(0,0); } 50%{ transform:translate(-2%,1%); } }
+@keyframes pulse { 0%,100%{ opacity:1;box-shadow:0 0 0 0 rgba(52,211,153,0.4); } 50%{ opacity:0.8;box-shadow:0 0 0 6px rgba(52,211,153,0); } }
 .container { position:relative; z-index:1; max-width:1200px; margin:0 auto; padding:40px 20px 60px; }
 .header { text-align:center; margin-bottom:48px; }
 .header h1 { font-size:2.5rem; font-weight:700; letter-spacing:-0.5px; margin-bottom:8px; }
@@ -45,43 +34,114 @@ body::before {
 .section-header { display:flex; align-items:center; gap:10px; margin-bottom:16px; padding-bottom:8px; border-bottom:1px solid var(--border); }
 .section-header h2 { font-size:1.1rem; font-weight:600; }
 .badge { background:var(--bg-glass); border:1px solid var(--border); border-radius:12px; padding:2px 10px; font-size:0.75rem; color:var(--text-secondary); }
-.task-item { display:flex; align-items:center; gap:12px; padding:12px 16px; background:var(--bg-card); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; backdrop-filter:blur(10px); }
+/* Agent Grid */
+.agent-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:12px; }
+.agent-card { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:16px; text-align:center; transition:all 0.3s ease; backdrop-filter:blur(10px); }
+.agent-card:hover { border-color:rgba(255,255,255,0.15); transform:translateY(-2px); box-shadow:0 8px 32px rgba(0,0,0,0.3); }
+.agent-card .emoji { font-size:2rem; margin-bottom:8px; display:block; }
+.agent-card .name { font-weight:600; font-size:1rem; margin-bottom:4px; }
+.agent-card .role { font-size:0.7rem; color:var(--text-secondary); margin-bottom:8px; }
+.agent-card .model-tag { display:inline-block; font-size:0.6rem; padding:2px 8px; border-radius:6px; background:rgba(74,158,255,0.15); color:var(--accent-blue); border:1px solid rgba(74,158,255,0.2); }
+.agent-card .model-tag.gemini { background:rgba(52,211,153,0.15); color:var(--accent-green); border-color:rgba(52,211,153,0.2); }
+.agent-card .model-tag.kimi { background:rgba(251,191,36,0.15); color:var(--accent-yellow); border-color:rgba(251,191,36,0.2); }
+.status-dot { display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--accent-green); margin-right:4px; animation:pulse 2s ease-in-out infinite; }
+.status-dot.new { background:var(--accent-yellow); animation:none; }
+.status-text { font-size:0.65rem; color:var(--accent-green); margin-top:6px; }
+.status-text.new { color:var(--accent-yellow); }
+/* Task items */
+.task-item { display:flex; align-items:center; gap:12px; padding:12px 16px; background:var(--bg-card); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; backdrop-filter:blur(10px); transition:all 0.2s; }
 .task-item:hover { border-color:rgba(255,255,255,0.12); }
 .task-status { font-size:0.7rem; padding:3px 8px; border-radius:6px; font-weight:500; white-space:nowrap; }
 .task-status.running { background:rgba(74,158,255,0.15); color:var(--accent-blue); }
 .task-status.high { background:rgba(248,113,113,0.15); color:var(--accent-red); }
 .task-status.pending { background:rgba(251,191,36,0.15); color:var(--accent-yellow); }
-.task-status.done { background:rgba(52,211,153,0.15); color:var(--accent-green); }
+.task-status.phase { background:rgba(167,139,250,0.15); color:var(--accent-purple); }
 .task-name { flex:1; font-size:0.85rem; }
 .task-agents { font-size:0.75rem; color:var(--text-secondary); white-space:nowrap; }
+/* Cron */
 .cron-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:8px; }
 .cron-item { display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--bg-card); border:1px solid var(--border); border-radius:8px; font-size:0.8rem; backdrop-filter:blur(10px); }
 .cron-time { font-weight:600; color:var(--accent-purple); min-width:45px; }
 .cron-name { flex:1; }
 .cron-agent { color:var(--text-secondary); }
-.completed-item { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); font-size:0.8rem; }
-.completed-date { color:var(--text-muted); font-size:0.7rem; min-width:50px; }
+/* Completed */
+.completed-item { display:flex; align-items:center; gap:10px; padding:8px 12px; border-bottom:1px solid var(--border); font-size:0.8rem; }
+.completed-date { color:var(--text-muted); font-size:0.7rem; min-width:40px; }
+.completed-icon { color:var(--accent-green); }
+/* Stats */
 .stats-bar { display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-top:40px; padding:20px; background:var(--bg-card); border:1px solid var(--border); border-radius:16px; backdrop-filter:blur(10px); }
 .stat { display:flex; align-items:center; gap:6px; padding:6px 14px; background:var(--bg-glass); border-radius:8px; font-size:0.8rem; }
 .stat .value { font-weight:600; color:var(--accent-blue); }
 .footer { text-align:center; margin-top:40px; color:var(--text-muted); font-size:0.75rem; }
-@media (max-width:768px) { .container { padding:20px 12px 40px; } .header h1 { font-size:1.8rem; } .cron-grid { grid-template-columns:1fr; } }
+@media (max-width:768px) { .container { padding:20px 12px 40px; } .header h1 { font-size:1.8rem; } .agent-grid { grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); gap:8px; } .cron-grid { grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
 <div class="container">
 <div class="header">
 <h1>🦞 AI 团队看板</h1>
-<div class="subtitle"><span class="live-dot"></span><span>更新时间：2026-03-11 00:14:22</span></div>
+<div class="subtitle"><span class="live-dot"></span><span>更新时间：2026-03-11 00:22:07</span></div>
 </div>
+<div class="section"><div class="section-header"><h2>👥 团队状态</h2><span class="badge">7 Agents</span></div>
+<div class="agent-grid">
+<div class="agent-card">
+<span class="emoji">🧠</span>
+<div class="name">统筹</div>
+<div class="role">任务分派 · 复盘调度</div>
+<span class="model-tag">GPT-5.4</span>
+<div class="status-text"><span class="status-dot"></span>在线</div>
+</div>
+<div class="agent-card">
+<span class="emoji">⚡</span>
+<div class="name">执行</div>
+<div class="role">代码执行 · 任务完成</div>
+<span class="model-tag">GPT-5.4</span>
+<div class="status-text"><span class="status-dot"></span>在线</div>
+</div>
+<div class="agent-card">
+<span class="emoji">🔍</span>
+<div class="name">调研</div>
+<div class="role">深度调研 · 趋势追踪</div>
+<span class="model-tag">GPT-5.4</span>
+<div class="status-text"><span class="status-dot"></span>在线</div>
+</div>
+<div class="agent-card">
+<span class="emoji">🎨</span>
+<div class="name">创意</div>
+<div class="role">视觉设计 · 内容策划</div>
+<span class="model-tag gemini">Gemini 3.1</span>
+<div class="status-text"><span class="status-dot"></span>在线</div>
+</div>
+<div class="agent-card">
+<span class="emoji">📚</span>
+<div class="name">知识</div>
+<div class="role">知识整理 · 学习回顾</div>
+<span class="model-tag">GPT-5.4</span>
+<div class="status-text"><span class="status-dot"></span>在线</div>
+</div>
+<div class="agent-card">
+<span class="emoji">🧭</span>
+<div class="name">复盘</div>
+<div class="role">日报通讯 · 团队反思</div>
+<span class="model-tag">GPT-5.4</span>
+<div class="status-text"><span class="status-dot"></span>在线</div>
+</div>
+<div class="agent-card">
+<span class="emoji">💰</span>
+<div class="name">理财</div>
+<div class="role">财经金融 · 市场分析</div>
+<span class="model-tag kimi">Kimi K2.5</span>
+<div class="status-text new"><span class="status-dot new"></span>新上线</div>
+</div>
+</div></div>
 <div class="section"><div class="section-header"><h2>🏃 进行中</h2><span class="badge">7 项</span></div>
-<div class="task-item"><span class="task-status running">🔄</span><span class="task-name">新 Board 版展示（团队日报）</span><span class="task-agents">总管+创意+知识</span></div>
-<div class="task-item"><span class="task-status running">🔄</span><span class="task-name">自媒体流程跑通（小红书 / X）</span><span class="task-agents">总管+执行+调研</span></div>
-<div class="task-item"><span class="task-status running">🔄</span><span class="task-name">新闻推送规则重构与稳定化</span><span class="task-agents">总管+调研+执行</span></div>
-<div class="task-item"><span class="task-status running">🔄</span><span class="task-name">市场实验方案确定与最小验证</span><span class="task-agents">总管+调研+理财</span></div>
-<div class="task-item"><span class="task-status running">🔄</span><span class="task-name">遥控 Claude Code 做一个小项目并发到 GitHub</span><span class="task-agents">总管+执行</span></div>
-<div class="task-item"><span class="task-status running">🔄</span><span class="task-name">安全巡检（安全 / 隐私 / 暴露检查）</span><span class="task-agents">总管+执行</span></div>
-<div class="task-item"><span class="task-status running">🔄</span><span class="task-name">知识库沉淀与模板整理</span><span class="task-agents">总管+知识+复盘</span></div>
+<div class="task-item"><span class="task-status running">执行中</span><span class="task-name">新 Board 版展示（团队日报）</span><span class="task-agents">总管+创意+知识</span></div>
+<div class="task-item"><span class="task-status running">执行中</span><span class="task-name">自媒体流程跑通（小红书 / X）</span><span class="task-agents">总管+执行+调研</span></div>
+<div class="task-item"><span class="task-status running">执行中</span><span class="task-name">新闻推送规则重构与稳定化</span><span class="task-agents">总管+调研+执行</span></div>
+<div class="task-item"><span class="task-status running">执行中</span><span class="task-name">市场实验方案确定与最小验证</span><span class="task-agents">总管+调研+理财</span></div>
+<div class="task-item"><span class="task-status running">执行中</span><span class="task-name">遥控 Claude Code 做一个小项目并发到 GitHub</span><span class="task-agents">总管+执行</span></div>
+<div class="task-item"><span class="task-status running">执行中</span><span class="task-name">安全巡检（安全 / 隐私 / 暴露检查）</span><span class="task-agents">总管+执行</span></div>
+<div class="task-item"><span class="task-status running">执行中</span><span class="task-name">知识库沉淀与模板整理</span><span class="task-agents">总管+知识+复盘</span></div>
 </div>
 <div class="section"><div class="section-header"><h2>📋 待接单</h2><span class="badge">5 项</span></div>
 <div class="task-item"><span class="task-status high">🔴 高</span><span class="task-name">团队日报展示优化（模板/可视化/可读性）</span><span class="task-agents">总管+创意+知识</span></div>
@@ -90,17 +150,32 @@ body::before {
 <div class="task-item"><span class="task-status pending">🟡 中</span><span class="task-name">GitHub 涨星计划（内容+分发+节奏）</span><span class="task-agents">总管+调研+创意</span></div>
 <div class="task-item"><span class="task-status pending">🟡 中</span><span class="task-name">执行 pin-lobby-message.sh 置顶消息</span><span class="task-agents">老大</span></div>
 </div>
-<div class="section"><div class="section-header"><h2>⏰ 定时任务</h2><span class="badge">0 active</span></div><div class="cron-grid">
+<div class="section"><div class="section-header"><h2>⏰ 定时任务</h2><span class="badge">15 active</span></div><div class="cron-grid">
+<div class="cron-item"><span class="cron-time">07:00</span><span class="cron-name">📰 早间待办日报</span><span class="cron-agent">🧭</span></div>
+<div class="cron-item"><span class="cron-time">07:50</span><span class="cron-name">📊 财经早盘</span><span class="cron-agent">💰</span></div>
+<div class="cron-item"><span class="cron-time">08:00</span><span class="cron-name">📰 看板播报 ↘ AI热闻①</span><span class="cron-agent">🧠</span></div>
+<div class="cron-item"><span class="cron-time">08:05</span><span class="cron-name">🔍 自动分派</span><span class="cron-agent">🧠</span></div>
+<div class="cron-item"><span class="cron-time">10:00</span><span class="cron-name">📱 自媒体草案</span><span class="cron-agent">⚡</span></div>
+<div class="cron-item"><span class="cron-time">11:35</span><span class="cron-name">📊 财经午盘</span><span class="cron-agent">💰</span></div>
+<div class="cron-item"><span class="cron-time">12:00</span><span class="cron-name">📰 看板播报</span><span class="cron-agent">🧠</span></div>
+<div class="cron-item"><span class="cron-time">12:30</span><span class="cron-name">🌐 AI新闻②</span><span class="cron-agent">🔍</span></div>
+<div class="cron-item"><span class="cron-time">15:30</span><span class="cron-name">📊 财经尾盘</span><span class="cron-agent">💰</span></div>
+<div class="cron-item"><span class="cron-time">17:00</span><span class="cron-name">🔥 GitHub Top10</span><span class="cron-agent">🔍</span></div>
+<div class="cron-item"><span class="cron-time">18:00</span><span class="cron-name">🌐 AI新闻③</span><span class="cron-agent">🔍</span></div>
+<div class="cron-item"><span class="cron-time">21:00</span><span class="cron-name">📋 看板播报 + 每日日报</span><span class="cron-agent">🧠</span></div>
+<div class="cron-item"><span class="cron-time">22:00</span><span class="cron-name">🌐 AI新闻④</span><span class="cron-agent">🔍</span></div>
+<div class="cron-item"><span class="cron-time">22:30</span><span class="cron-name">📊 对劲收复</span><span class="cron-agent">💰</span></div>
+<div class="cron-item"><span class="cron-time">01:00</span><span class="cron-name">🔒 深夜安全巡检</span><span class="cron-agent">⚡</span></div>
 </div></div>
 <div class="section"><div class="section-header"><h2>✅ 近期完成</h2></div>
-<div class="completed-item"><span class="completed-date"></span>知识库 9 分类种子文件创建（README.md + YAML front matter + Obsidian 双链规范）</div>
-<div class="completed-item"><span class="completed-date"></span>agent-models.sh 重写（jq 自动切换、全模型别名、--all/--fallback/--list）</div>
-<div class="completed-item"><span class="completed-date"></span>自媒体频道 Cron 自动化配置（每天 CST 10:00 内容草案）</div>
-<div class="completed-item"><span class="completed-date"></span>团队工作日报（2026-03-06）结构化提炼并归档到知识库（含 YAML + Obsidian 双链）</div>
-<div class="completed-item"><span class="completed-date"></span>学习位完成日报二次加工：补充标签 `AI新闻`、`gpt-codex`，增强后续检索</div>
-<div class="completed-item"><span class="completed-date"></span>日报展示优化 v1 完成：频道速览版 + 看板归档版模板已标准化（含 YAML / 双链）</div>
-<div class="completed-item"><span class="completed-date"></span>协作大厅自动分派机制已上线（08:05 自动分派 + 08:35 回执追踪）</div>
-<div class="completed-item"><span class="completed-date"></span>圆桌论坛（4 模型讨论室）创建与配置完成</div>
+<div class="completed-item"><span class="completed-icon">✅</span>知识库 9 分类种子文件创建（README.md + YAML front matter + Obsidian 双链规范）</div>
+<div class="completed-item"><span class="completed-icon">✅</span>agent-models.sh 重写（jq 自动切换、全模型别名、--all/--fallback/--list）</div>
+<div class="completed-item"><span class="completed-icon">✅</span>自媒体频道 Cron 自动化配置（每天 CST 10:00 内容草案）</div>
+<div class="completed-item"><span class="completed-icon">✅</span>团队工作日报（2026-03-06）结构化提炼并归档到知识库（含 YAML + Obsidian 双链）</div>
+<div class="completed-item"><span class="completed-icon">✅</span>学习位完成日报二次加工：补充标签 `AI新闻`、`gpt-codex`，增强后续检索</div>
+<div class="completed-item"><span class="completed-icon">✅</span>日报展示优化 v1 完成：频道速览版 + 看板归档版模板已标准化（含 YAML / 双链）</div>
+<div class="completed-item"><span class="completed-icon">✅</span>协作大厅自动分派机制已上线（08:05 自动分派 + 08:35 回执追踪）</div>
+<div class="completed-item"><span class="completed-icon">✅</span>圆桌论坛（4 模型讨论室）创建与配置完成</div>
 </div>
 <div class="stats-bar">
 <div class="stat"><span>🤖</span><span class="value">7</span> Agents</div>
@@ -109,6 +184,7 @@ body::before {
 <div class="stat"><span>💎</span><span class="value">Gemini 3.1</span> Pro</div>
 <div class="stat"><span>⏰</span><span class="value">15</span> Cron Jobs</div>
 <div class="stat"><span>🧬</span><span class="value">LanceDB</span> Memory</div>
+<div class="stat"><span>💬</span><span class="value">12</span> Discord 频道</div>
 </div>
 <div class="footer">🦞 OpenClaw 2026.3.8 · Powered by GPT-5.4 × Gemini 3.1 × Kimi K2.5</div>
 </div></body></html>
